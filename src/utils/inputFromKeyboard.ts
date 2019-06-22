@@ -1,23 +1,12 @@
-
-
-const readline = require('readline');
-
-const rl = readline.createInterface({
+import readline from 'readline-promise';
+import { resolve } from 'path';
+ 
+export const getInput = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
+  terminal: true
 });
-
-
-export const getInput = (text:string) => {
-  return new Promise ( (resolve,reject) => {
-    rl.question(text, (answer) => {
-      try {
-        resolve(answer)
-        rl.close();
-      } catch (error) {
-        reject(error)
-      }
-    });
-  })
-}
-
+ 
+let bar = null;
+ 
+// rlp.questionAsync('Foo?').then(answer => {

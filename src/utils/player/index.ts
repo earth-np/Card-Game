@@ -4,16 +4,16 @@ import { getInput } from "../inputFromKeyboard";
 
 export class Player {
   private static startHp: number = 30;
-  name = ''
+  name = "";
   private slotMp: number = 0;
   private hp: number = null;
   private mp: number = null;
   private playerDeck: Deck = null;
   private cardOnHand: number[] = [];
-  private ability:any = {}
+  private ability: any = {};
   private active = false;
   constructor(name) {
-    this.name = name
+    this.name = name;
     this.hp = Player.startHp;
     this.mp = this.slotMp;
     this.playerDeck = new Deck();
@@ -21,10 +21,11 @@ export class Player {
     this.drawCard();
     this.drawCard();
   }
-  addAbility = (skill) => {
-    this.ability = skill
-  }
-  getDamage = (damage) => this.hp - damage  < 0 ? this.hp = 0 : this.hp -= damage
+  addAbility = skill => {
+    this.ability = skill;
+  };
+  getDamage = damage =>{ console.log(`Player: ${this.name} HP:${this.getCurrentHp()}/30`);
+    this.hp - damage < 0 ? (this.hp = 0) : (this.hp -= damage);}
   getCurrentHp = () => this.hp;
   getCurrentMp = () => this.mp;
   getCurrentManaSlot = () => this.slotMp;
@@ -34,36 +35,50 @@ export class Player {
   };
   getCardOnHand = () => this.cardOnHand;
   endTurnCondition = () => {
-    console.log('card on hand',this.cardOnHand.length);
     let condition = null;
-    (this.cardOnHand.length === 0 || this.getCurrentMp() <= 0 )? (condition = true) : (condition = false);
+    this.cardOnHand.length === 0 || this.getCurrentMp() <= 0
+      ? (condition = true)
+      : (condition = false);
+    if (condition) console.log("END TURN");
     return condition;
   };
   doAction = (actions: string) => {
-    const action:string[] = actions.split(' ')
-    const command = action[0]
-    if(command === 'cast'){
-      const card = +action[1]
-      this.cardOnHand = this.cardOnHand.splice(card,1)
-      this.mp -= card
-      this.ability.attackOpposite(card)
-    }
-    else if (command === 'end'){
+    const action: string[] = actions.split(" ");
+    const command = action[0];
+    if (command === "cast") {
+      const index = +action[1];
+      if (index >= this.cardOnHand.length) {
+        console.log("plz choose card on your hand");
+        return;
+      }
+      if (this.cardOnHand[index] > this.mp) {
+        console.log("not enough mana");
+        return;
+      }
 
-    }
-    else {
-
+      const card = this.cardOnHand.splice(index, 1)[0];
+      this.mp -= card;
+      this.ability.attackOpposite(card);
+    } else if (command === "end") {
+      this.mp = 0;
+    } else {
     }
   };
   playTurn = async () => {
-    this.slotMp += 1;
-    this.mp = this.slotMp;
-    this.drawCard();
-    while (!(this.endTurnCondition())) {
-      console.log(`Your current HP: ${this.getCurrentHp()} MP: ${this.getCurrentMp()}/${this.getCurrentManaSlot()} Hand ${this.cardOnHand}`);
-      // const actions:any = await getInput("Your action: ");
-      const actions = 'cast 0'
-      this.doAction(actions);
-    }
+    return new Promise(async (resolve, reject) => {
+      this.slotMp += 1;
+      this.mp = this.slotMp;
+      this.drawCard();
+      while (!this.endTurnCondition()) {
+        console.log(
+          `Your current HP: ${this.getCurrentHp()} MP: ${this.getCurrentMp()}/${this.getCurrentManaSlot()} Hand ${
+            this.cardOnHand
+          }`
+        );
+        const actions: any = await getInput.questionAsync("Your action: ");
+        this.doAction(actions);
+      }
+      resolve();
+    });
   };
 }

@@ -33,18 +33,21 @@ export class Board {
   attackPlayer2 = (damage) => {
     this.playerTwo.getDamage(damage)
   }
-  activatePlayer = () => {
+  activatePlayer = async() => {
     const nextPlayer:Player = this.currentTurn % 2 ? this.playerOne : this.playerTwo;
     console.log(nextPlayer.name);
-    nextPlayer.playTurn()
+    await nextPlayer.playTurn()
   }
-  endCondition = () =>  {return this.currentTurn === 10}
-  startGame = () => {
+  endCondition = () =>  {
+    if((this.playerOne.getCurrentHp() === 0 )||( this.playerTwo.getCurrentHp() === 0) ) return true
+    return false
+  }
+  startGame = async () => {
     console.log('Game Start !!!!');
     if(this.playerOne === null || this.playerTwo === null) throw new Error('Not enough PLayer')
     while(!this.endCondition()){
-      console.log('Turn ',this.currentTurn);
-      this.activatePlayer()
+      console.log('\n\n\n\n\n\n+++++++++++++++Turn ',this.currentTurn);
+      await this.activatePlayer()
       this.currentTurn += 1
     }
 
